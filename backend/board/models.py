@@ -2,39 +2,37 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # Create your models here.
-class Place(models.Model):
-    country = models.CharField(max_length=64, default="Egypt")
-    city = models.CharField(max_length=64, default="Cairo")
+def avatar_upload(instance, filename):
+    imagename, extension = filename.split(".")
+    return "users/%s.%s" % (instance.id, extension)
 
 
 class User(AbstractUser):
-    name = models.CharField(max_length=64)
+    first_name = models.CharField(max_length=64)
+    last_name = models.CharField(max_length=64)
     email = models.EmailField(max_length=64, unique=True)
+    username = models.CharField(max_length=128)
     about = models.TextField()
     birth_date = models.DateField()
-    hometown = models.OneToOneField(Place, max_length=64)
-    present_location = models.OneToOneField(Place, max_length=64)
+    hometown = models.CharField(max_length=64)
+    present_location = models.CharField(max_length=64)
     website = models.CharField(
-        max_length=128, null=True, blank=True, default="undefined"
+        max_length=128, null=True, blank=True, default="Undefined"
     )
-    GENDER_TYPES = (
-        ("Male", "Male"),
-        ("Female", "Female"),
-        ("Prefer not to say", "Prefer not to say"),
-    )
+    GENDER_TYPES = (("Male", "Male"), ("Female", "Female"), ("Other", "Other"))
     gender = models.CharField(max_length=64, choices=GENDER_TYPES)
     interests = models.CharField(
-        max_length=128, null=True, blank=True, default="undefined"
+        max_length=128, null=True, blank=True, default="Undefined"
     )
-    avatar = models.ImageField(default=None)
+    avatar = models.ImageField(upload_to=avatar_upload)
     is_moderator = models.BooleanField("Moderator", default=False)
     is_administrator = models.BooleanField("Administrator", default=False)
     is_banned = models.BooleanField("Banned", default=False)
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = [
-        "name",
-        "email",
+        "first_name",
+        "last_name",
+        "username",
         "about",
         "birth_date",
         "hometown",
@@ -45,23 +43,20 @@ class User(AbstractUser):
         return f"{self.username}"
 
 
-class Topic(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=64)
-
-    def __str__(self):
-        return f"{self.title}"
+def image_upload(instance, filename):
+    imagename, extension = filename.split(".")
+    return "boards/%s.%s" % (instance.id, extension)
 
 
 class Board(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=64)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    topic = models.CharField(max_length=64)
     description = models.TextField()
-    image = models.ImageField(default=None)
+    image = models.ImageField(upload_to=image_upload)
 
     def __str__(self):
-        return f"{self.title} - {self.topic.title}"
+        return f"{self.title} - {self.topic}"
 
 
 class Thread(models.Model):
@@ -78,26 +73,12 @@ class Thread(models.Model):
 
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    author_avatar = models.ImageField(default=None)
-    board = models.ForeignKey(Board, on_delete=models.CASCADE)
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    message = models.TextField()
-
-    def save(self, *args, **kwargs):
-        self.board = self.thread.board
-        super(Post, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.author.username} - {self.thread.title} - {self.board.title}"
-
-
-class Reply(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
-    reply = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    message = models.TextField()
 
     def __str__(self):
-        return f"{self.author.username} - {self.reply}"
+        return (
+            f"{self.author.username} - {self.thread.title} - {self.thread.board.title}"
+        )

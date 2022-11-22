@@ -1,1 +1,4 @@
 __pycache__/
+media/
+!/board/migrations/__init__.py
+/board/migrations/
