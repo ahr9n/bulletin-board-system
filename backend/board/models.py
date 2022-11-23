@@ -39,13 +39,22 @@ class User(AbstractUser):
         "present_location",
     ]
 
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            saved_image = self.image
+            self.image = None
+            super(User, self).save(*args, **kwargs)
+            self.image = saved_image
+            self.image = self.image
+        super(User, self).save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.username}"
 
 
 def image_upload(instance, filename):
     imagename, extension = filename.split(".")
-    return "boards/%s.%s" % (instance.id, extension)
+    return f"boards/{instance.id}.{extension}"
 
 
 class Board(models.Model):
@@ -54,6 +63,15 @@ class Board(models.Model):
     topic = models.CharField(max_length=64)
     description = models.TextField()
     image = models.ImageField(upload_to=image_upload)
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            saved_image = self.image
+            self.image = None
+            super(Board, self).save(*args, **kwargs)
+            self.image = saved_image
+            self.image = self.image
+        super(Board, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} - {self.topic}"
