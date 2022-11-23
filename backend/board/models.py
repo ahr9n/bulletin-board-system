@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -13,7 +14,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=64, unique=True)
     username = models.CharField(max_length=128)
     about = models.TextField()
-    birth_date = models.DateField()
+    birth_date = models.DateField(default=datetime.date.today)
     hometown = models.CharField(max_length=64)
     present_location = models.CharField(max_length=64)
     website = models.CharField(
@@ -30,22 +31,16 @@ class User(AbstractUser):
     is_banned = models.BooleanField("Banned", default=False)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = [
-        "first_name",
-        "last_name",
         "username",
-        "about",
-        "birth_date",
-        "hometown",
-        "present_location",
     ]
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            saved_image = self.image
-            self.image = None
+            saved_image = self.avatar
+            self.avatar = None
             super(User, self).save(*args, **kwargs)
-            self.image = saved_image
-            self.image = self.image
+            self.avatar = saved_image
+            self.avatar = self.avatar
         super(User, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -93,7 +88,6 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
     message = models.TextField()
 
     def __str__(self):
