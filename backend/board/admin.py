@@ -8,7 +8,7 @@ admin.site.site_title = "Bulletin Board System"
 # Register your models here.
 admin.site.register(User)
 
-# Topic, Board, Thread, Post, Reply
+# Board, Thread, Post
 admin.site.register(Board)
 admin.site.register(Thread)
 admin.site.register(Post)
