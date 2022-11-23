@@ -17,8 +17,8 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # working with postgresql
-# env = environ.Env(DEBUG=(bool, False))
-# environ.Env.read_env()
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "django_filters",
+    "knox",
 ]
 
 AUTH_USER_MODEL = "board.User"
@@ -86,17 +87,13 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
-    # "default": {
-    #     "ENGINE": "django.db.backends.postgresql",
-    #     "NAME": env('DB_Name'),
-    #     "USER": env('DB_User'),
-    #     "HOST": env('DB_Host'),
-    #     "PORT": env('DB_Port'),
-    #     "PASSWORD": env('DB_Password')
-    # }
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "board",
+        "USER": "radwan",
+        "PASSWORD": "Ar2399",
+        "HOST": "localhost",
+        "PORT": "",
+    }
 }
 
 
@@ -128,6 +125,8 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
 
 
@@ -151,7 +150,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # rest
-REST_FRAMEWORK = {}
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "knox.auth.TokenAuthentication",
+    ],
+}
 
 # cors
 CORS_ALLOW_ALL_ORIGINS = True
