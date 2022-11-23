@@ -1,0 +1,5 @@
+__pycache__
+!backend/board/migrations/__init__.py
+backend/board/migrations/
+backend/media/
+db.sqlite3
