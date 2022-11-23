@@ -15,6 +15,8 @@ django-environ = "^0.9.0"
 pillow = "^9.3.0"
 django-filter = "^22.1"
 django-cors-headers = "^3.13.0"
+django-rest-knox = "^4.2.0"
+psycopg2 = "^2.9.5"
 
 
 [build-system]
