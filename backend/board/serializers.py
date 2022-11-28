@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import User, Board, Thread, Post
+from .models import User, Topic, Board, Thread, Post
 from django.contrib.auth import authenticate
+import re
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -23,10 +24,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        if data["confirmed_password"] == data["password"]:
+        if data["password"] == data["confirmed_password"] and re.match(
+            r"^(?=[^\d_].*?\d)\w(\w|[!@#$%]){7,20}", data["password"]
+        ):
             return data
+        elif not re.match(r"^(?=[^\d_].*?\d)\w(\w|[!@#$%]){7,20}", data["password"]):
+            raise serializers.ValidationError("The password is not strong enough")
         else:
-            raise serializers.ValidationError("Password doesn't match.")
+            raise serializers.ValidationError("Password doesn't match")
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -44,7 +49,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    email = serializers.CharField()
     password = serializers.CharField()
 
     def validate(self, data):
@@ -81,6 +86,20 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
 
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = ["id", "title", "author"]
+        extra_kwargs = {"author": {"required": False}}
+
+    def create(self, validated_data):
+        topic = Topic.objects.create(
+            author=self.context["request"].user,
+            title=validated_data["title"],
+        )
+        return topic
+
+
 class BoardSerializer(serializers.ModelSerializer):
     threads_count = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
@@ -96,7 +115,7 @@ class BoardSerializer(serializers.ModelSerializer):
         return count
 
     def create(self, validated_data):
-        return User(**validated_data)
+        return Board(**validated_data)
 
     class Meta:
         model = Board
@@ -104,15 +123,34 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class ThreadSerializer(serializers.ModelSerializer):
-    last_reply_data = serializers.SerializerMethodField()
+    last_reply_date = serializers.SerializerMethodField()
+    last_reply_poster_name = serializers.SerializerMethodField()
+    last_reply_poster_id = serializers.SerializerMethodField()
 
-    def get_last_reply_data(self, obj):
+    def get_last_reply_date(self, obj):
         post = Post.objects.filter(thread__id=obj.id)
         if len(post) == 0:
             return None
         post = post.latest("created_at")
         serializer = PostSerializer(post, many=False)
-        return serializer.data
+        return serializer.data["created_at"]
+
+    def get_last_reply_poster_id(self, obj):
+        post = Post.objects.filter(thread__id=obj.id)
+        if len(post) == 0:
+            return None
+        post = post.latest("created_at")
+        serializer = PostSerializer(post, many=False)
+        return serializer.data["author"]
+
+    def get_last_reply_poster_name(self, obj):
+        post = Post.objects.filter(thread__id=obj.id)
+        if len(post) == 0:
+            return None
+        post = post.latest("created_at")
+        serializer = PostSerializer(post, many=False)
+        user = User.objects.get(pk=int(serializer.data["author"]))
+        return user.username
 
     def create(self, validated_data):
         return Thread(**validated_data)
@@ -123,11 +161,16 @@ class ThreadSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    poster = serializers.SerializerMethodField()
+    author_name = serializers.SerializerMethodField()
+    author_avatar = serializers.SerializerMethodField()
 
-    def get_poster(self, obj):
+    def get_author_name(self, obj):
         serializer = UserSerializer(obj.author, many=False)
-        return serializer.data
+        return serializer.data["username"]
+
+    def get_author_avatar(self, obj):
+        serializer = UserSerializer(obj.author, many=False)
+        return serializer.data["avatar"]
 
     def create(self, validated_data):
         return Post(**validated_data)
