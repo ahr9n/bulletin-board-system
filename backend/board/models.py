@@ -29,10 +29,9 @@ class User(AbstractUser):
     is_moderator = models.BooleanField("Moderator", default=False)
     is_administrator = models.BooleanField("Administrator", default=False)
     is_banned = models.BooleanField("Banned", default=False)
+    EMAIL_FIELD = "username"
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = [
-        "username",
-    ]
+    REQUIRED_FIELDS = ["username"]
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -47,6 +46,14 @@ class User(AbstractUser):
         return f"{self.username}"
 
 
+class Topic(models.Model):
+    title = models.CharField(max_length=64)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
+
 def image_upload(instance, filename):
     imagename, extension = filename.split(".")
     return f"boards/{instance.id}.{extension}"
@@ -54,8 +61,8 @@ def image_upload(instance, filename):
 
 class Board(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     title = models.CharField(max_length=64)
-    topic = models.CharField(max_length=64)
     description = models.TextField()
     image = models.ImageField(upload_to=image_upload)
 
