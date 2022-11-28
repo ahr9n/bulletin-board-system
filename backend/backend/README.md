@@ -36,4 +36,11 @@ postgres=# \q
 
 ---
 
+To clear the database, and start again: Log into the interactive Postgres session again, and type: 
+```sql
+postgres=# DROP DATABASE board;
+```
+
+---
+
 Thanks for reading!
