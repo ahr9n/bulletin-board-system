@@ -54,23 +54,33 @@ function BoardList() {
               >
                 {group_by_topic ? (
                   <Button
-                    style={{ height: "35px", marginLeft: "5px", marginRight: "5px" }}
+                    style={{
+                      height: "35px",
+                      marginLeft: "5px",
+                      marginRight: "5px",
+                    }}
                     variant="contained"
                     color="primary"
                     size="small"
                     onClick={handleGroup_by_topic}
                   >
                     Group By Topic
-                  </Button>) : (
+                  </Button>
+                ) : (
                   <Button
-                    style={{ height: "35px", marginLeft: "5px", marginRight: "5px" }}
+                    style={{
+                      height: "35px",
+                      marginLeft: "5px",
+                      marginRight: "5px",
+                    }}
                     variant="contained"
-                    color='inherit'
+                    color="inherit"
                     size="small"
                     onClick={handleGroup_by_topic}
                   >
                     Group By Topic
-                  </Button>)}
+                  </Button>
+                )}
                 <BoardForm />
                 <TopicForm />
               </Container>
@@ -79,14 +89,18 @@ function BoardList() {
               <>
                 {TopicStore.getTopicsList().map((topic) => (
                   <Container key={topic.id}>
-                    <div className='Title'>
+                    <div className="Title">
                       <p>{topic.title}</p>
                     </div>
-                    <Grid container spacing={3}
+                    <Grid
+                      container
+                      spacing={3}
                       rowSpacing={1}
                       justifyContent="center"
-                      alignItems="center">
-                      {BoardStore.getBoardsList().filter((board) => board.topic === topic.id)
+                      alignItems="center"
+                    >
+                      {BoardStore.getBoardsList()
+                        .filter((board) => board.topic === topic.id)
                         .map((board) => {
                           return (
                             <Grid

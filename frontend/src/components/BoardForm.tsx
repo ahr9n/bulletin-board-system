@@ -55,7 +55,9 @@ function BoardForm() {
     const data = {
       title: title,
       description: description,
-      image: e.currentTarget.picture.files[0] || "https://reactnativeelements.com/img/avatar/avatar--icon.jpg",
+      image:
+        e.currentTarget.picture.files[0] ||
+        "https://reactnativeelements.com/img/avatar/avatar--icon.jpg",
       author: UserStore.getUser().id,
       topic: topic,
     };
