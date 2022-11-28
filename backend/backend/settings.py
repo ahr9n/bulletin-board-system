@@ -31,8 +31,9 @@ SECRET_KEY = "django-insecure-xj!y7x@5c4p&*0!vws)rtofv7q4gf@9rz2+8t+kecso&l7hqqm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # DEBUG = env("DEBUG")
+# DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -43,9 +44,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # ============================
     "rest_framework",
     "django_filters",
     "knox",
+    "corsheaders",
 ]
 
 AUTH_USER_MODEL = "board.User"
@@ -135,11 +138,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    "/var/www/static/",
-]
-
 # To save Avatars and boards images
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -154,8 +152,12 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "knox.auth.TokenAuthentication",
     ],
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
 }
 
 # cors
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_URLS_REGEX = r"^/api/.*$"
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_URLS_REGEX = r"*"
