@@ -2,11 +2,6 @@ import datetime
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Create your models here.
-def avatar_upload(instance, filename):
-    imagename, extension = filename.split(".")
-    return "users/%s.%s" % (instance.id, extension)
-
 
 class User(AbstractUser):
     first_name = models.CharField(max_length=64)
@@ -17,30 +12,17 @@ class User(AbstractUser):
     birth_date = models.DateField(default=datetime.date.today)
     hometown = models.CharField(max_length=64)
     present_location = models.CharField(max_length=64)
-    website = models.CharField(
-        max_length=128, null=True, blank=True, default="Undefined"
-    )
+    website = models.CharField(max_length=128, blank=True, default="Undefined")
     GENDER_TYPES = (("Male", "Male"), ("Female", "Female"), ("Other", "Other"))
     gender = models.CharField(max_length=64, choices=GENDER_TYPES)
-    interests = models.CharField(
-        max_length=128, null=True, blank=True, default="Undefined"
-    )
-    avatar = models.ImageField(upload_to=avatar_upload)
+    interests = models.CharField(max_length=128, blank=True, default="Undefined")
+    avatar = models.ImageField(upload_to="users/%Y/%m/%d/", blank=True)
     is_moderator = models.BooleanField("Moderator", default=False)
     is_administrator = models.BooleanField("Administrator", default=False)
     is_banned = models.BooleanField("Banned", default=False)
     EMAIL_FIELD = "username"
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            saved_image = self.avatar
-            self.avatar = None
-            super(User, self).save(*args, **kwargs)
-            self.avatar = saved_image
-            self.avatar = self.avatar
-        super(User, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.username}"
@@ -54,26 +36,12 @@ class Topic(models.Model):
         return self.title
 
 
-def image_upload(instance, filename):
-    imagename, extension = filename.split(".")
-    return f"boards/{instance.id}.{extension}"
-
-
 class Board(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     title = models.CharField(max_length=64)
     description = models.TextField()
-    image = models.ImageField(upload_to=image_upload)
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            saved_image = self.image
-            self.image = None
-            super(Board, self).save(*args, **kwargs)
-            self.image = saved_image
-            self.image = self.image
-        super(Board, self).save(*args, **kwargs)
+    image = models.ImageField(upload_to="boards/%Y/%m/%d/", blank=True)
 
     def __str__(self):
         return f"{self.title} - {self.topic}"
