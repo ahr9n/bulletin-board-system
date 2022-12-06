@@ -3,7 +3,7 @@ from django.contrib.auth import login
 from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter
 from knox.models import AuthToken
@@ -61,6 +61,7 @@ class UserView(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = User.objects.all()
     pagination_class = None
+    parser_classes = (MultiPartParser, FormParser)
 
 
 class TopicView(viewsets.ModelViewSet):
@@ -99,7 +100,7 @@ class BoardView(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Board.objects.all()
-    parser_classes = (MultiPartParser,)
+    parser_classes = (MultiPartParser, FormParser)
     pagination_class = None
 
     def create(self, request):

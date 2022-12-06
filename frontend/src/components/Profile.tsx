@@ -81,6 +81,7 @@ function Profile() {
               marginBottom: "30px",
             }}
           >
+            {/* eslint-disable-next-line */}
             {posts.reverse().map((post) => {
               if (post.author === ProfileStore.getProfile().id) {
                 return (
@@ -142,7 +143,7 @@ function Profile() {
               display="flex"
               variant="h4"
             >
-              {ProfileStore.getProfile().first_name}{" "}
+              {"Name: " + ProfileStore.getProfile().first_name}{" "}
               {ProfileStore.getProfile().last_name}
             </Typography>
             <Typography
@@ -151,7 +152,7 @@ function Profile() {
               display="flex"
               variant="h5"
             >
-              {ProfileStore.getProfile().username}
+              {"Username: " + ProfileStore.getProfile().username}
             </Typography>
             {ProfileStore.getProfile().is_administrator ? (
               <Typography
@@ -178,7 +179,7 @@ function Profile() {
               display="flex"
               variant="h5"
             >
-              {ProfileStore.getProfile().gender}
+              {"Gender: " + ProfileStore.getProfile().gender}
             </Typography>
             <Typography
               color="inherit"
@@ -186,7 +187,7 @@ function Profile() {
               display="flex"
               variant="h5"
             >
-              {ProfileStore.getProfile().about}
+              {"About: " + ProfileStore.getProfile().about}
             </Typography>
             <Typography
               color="inherit"

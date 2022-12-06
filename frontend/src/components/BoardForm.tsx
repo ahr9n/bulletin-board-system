@@ -12,21 +12,18 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
-
 import { AxiosInstance } from "../utils/functions";
-
 import UserStore from "../stores/UserStore";
 import BoardStore from "../stores/BoardStore";
 import TopicStore from "../stores/TopicStore";
-
 import { BoardFormInterface } from "../../data/interfaces";
-import ProfileStore from "../stores/ProfileStore";
 
 function BoardForm() {
   const [open, setOpen] = React.useState(false);
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [topic, setTopic] = React.useState("undefined");
+  const [image, setImage] = React.useState<string | Blob>("");
 
   const titleHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     const title = event.target.value;
@@ -48,6 +45,11 @@ function BoardForm() {
   const handleTopic = (event: SelectChangeEvent<{}>) => {
     setTopic(event.target.value as string);
   };
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files != null) {
+      setImage(e.target.files[0]);
+    }
+  };
 
   const handleForm = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -55,9 +57,7 @@ function BoardForm() {
     const data = {
       title: title,
       description: description,
-      image:
-        e.currentTarget.picture.files[0] ||
-        "https://reactnativeelements.com/img/avatar/avatar--icon.jpg",
+      image: image,
       author: UserStore.getUser().id,
       topic: topic,
     };
@@ -118,7 +118,6 @@ function BoardForm() {
                 labelId="topic"
                 id="topic"
                 value={topic}
-                // something wrong
                 onChange={handleTopic}
                 required
               >
@@ -141,10 +140,11 @@ function BoardForm() {
             Picture:{" "}
             <input
               accept="image/*"
-              name="picture"
+              name="image"
               type="file"
+              required
               multiple={false}
-              // required
+              onChange={(e) => handleImage(e)}
             />
           </form>
         </DialogContent>
