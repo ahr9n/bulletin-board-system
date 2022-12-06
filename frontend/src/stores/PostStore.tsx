@@ -16,7 +16,6 @@ class PostStore {
   }
 
   constructor() {
-    // this.fetchPosts();
     makeAutoObservable(this);
   }
   async fetchProfilePosts(id: string, page: number) {

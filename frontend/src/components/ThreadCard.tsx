@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -68,7 +67,7 @@ function ThreadCard({
         </Typography>
         <Typography gutterBottom variant="h6" component="div">
           <p style={{ textAlign: "left", color: "gray" }}>
-            <b>Date:</b>{" "}
+            <b>Date: </b>
             {thread.last_reply_date != null ? (
               <TimeAgo date={thread.last_reply_date} />
             ) : (

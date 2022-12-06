@@ -6,8 +6,6 @@ from django.contrib.auth.admin import UserAdmin
 admin.site.site_header = "Bulletin Board System"
 admin.site.site_title = "Bulletin Board System"
 
-# Register your models here.
-
 
 class MyUserAdmin(UserAdmin):
     add_form = MyUserCreationForm
@@ -44,8 +42,6 @@ class MyUserAdmin(UserAdmin):
 
 
 admin.site.register(User, MyUserAdmin)
-
-# Topic, Board, Thread, Post
 admin.site.register(Topic)
 admin.site.register(Board)
 admin.site.register(Thread)

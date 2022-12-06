@@ -8,9 +8,9 @@ export interface UserInterface {
   birth_date: string;
   hometown: string;
   present_location: string;
-  website: string;
+  website: string | null;
   gender: string;
-  interests: string;
+  interests: string | null;
   avatar: string;
   is_moderator: boolean;
   is_administrator: boolean;
@@ -35,7 +35,6 @@ export interface Board {
   title: string;
   topic: number;
   description: string;
-  // URL to image
   image: string;
   threads_count: number;
   posts_count: number;

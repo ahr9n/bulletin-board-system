@@ -12,7 +12,7 @@ function Header() {
     if (location.pathname !== "/login") navigate("/login");
   }
   function navigateToRegister() {
-    if (location.pathname !== "/register") navigate("/register");
+    if (location.pathname !== "/registration") navigate("/registration");
   }
   function navigateToUserProfile() {
     if (location.pathname !== "/profile")
