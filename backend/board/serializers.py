@@ -1,11 +1,10 @@
 from rest_framework import serializers
 from .models import User, Topic, Board, Thread, Post
-from django.contrib.auth import authenticate
-import re
+from django.contrib.auth import authenticate, password_validation
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    confirmed_password = serializers.CharField()
+    password2 = serializers.CharField()
 
     class Meta:
         model = User
@@ -16,22 +15,25 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email",
             "username",
             "password",
-            "confirmed_password",
+            "password2",
             "about",
             "birth_date",
             "hometown",
             "present_location",
         ]
 
-    def validate(self, data):
-        if data["password"] == data["confirmed_password"] and re.match(
-            r"^(?=[^\d_].*?\d)\w(\w|[!@#$%]){7,20}", data["password"]
-        ):
-            return data
-        elif not re.match(r"^(?=[^\d_].*?\d)\w(\w|[!@#$%]){7,20}", data["password"]):
+    def validate_password1(self, data):
+        result = password_validation.validate_password(data["password"])
+        if data["password"] != data["password2"]:
+            raise serializers.ValidationError("Password doesn't match")
+        elif result is None:
             raise serializers.ValidationError("The password is not strong enough")
         else:
-            raise serializers.ValidationError("Password doesn't match")
+            return data
+
+    def validate(self, data):
+        self.validate_password1(data)
+        return super().validate(data)
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -114,9 +116,6 @@ class BoardSerializer(serializers.ModelSerializer):
             count += thread.post_set.count()
         return count
 
-    def create(self, validated_data):
-        return Board(**validated_data)
-
     class Meta:
         model = Board
         fields = "__all__"
@@ -129,31 +128,24 @@ class ThreadSerializer(serializers.ModelSerializer):
 
     def get_last_reply_date(self, obj):
         post = Post.objects.filter(thread__id=obj.id)
-        if len(post) == 0:
+        if not len(post):
             return None
         post = post.latest("created_at")
-        serializer = PostSerializer(post, many=False)
-        return serializer.data["created_at"]
+        return post.created_at
 
     def get_last_reply_poster_id(self, obj):
         post = Post.objects.filter(thread__id=obj.id)
-        if len(post) == 0:
+        if not len(post):
             return None
         post = post.latest("created_at")
-        serializer = PostSerializer(post, many=False)
-        return serializer.data["author"]
+        return post.author
 
     def get_last_reply_poster_name(self, obj):
         post = Post.objects.filter(thread__id=obj.id)
-        if len(post) == 0:
+        if not len(post):
             return None
         post = post.latest("created_at")
-        serializer = PostSerializer(post, many=False)
-        user = User.objects.get(pk=int(serializer.data["author"]))
-        return user.username
-
-    def create(self, validated_data):
-        return Thread(**validated_data)
+        return post.author.username
 
     class Meta:
         model = Thread
@@ -171,9 +163,6 @@ class PostSerializer(serializers.ModelSerializer):
     def get_author_avatar(self, obj):
         serializer = UserSerializer(obj.author, many=False)
         return serializer.data["avatar"]
-
-    def create(self, validated_data):
-        return Post(**validated_data)
 
     class Meta:
         model = Post
