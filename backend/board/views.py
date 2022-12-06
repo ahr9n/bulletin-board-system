@@ -71,7 +71,7 @@ class TopicView(viewsets.ModelViewSet):
 
     def create(self, request):
         post_data = request.data
-        if request.user.is_administrator == True and request.user.is_banned == False:
+        if request.user.is_administrator and not request.user.is_banned:
             serializer = self.get_serializer(data=post_data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
@@ -85,7 +85,7 @@ class TopicView(viewsets.ModelViewSet):
             )
 
     def destroy(self, request, *args, **kwargs):
-        if request.user.is_administrator == True and request.user.is_banned == False:
+        if request.user.is_administrator and not request.user.is_banned:
             instance = self.get_object()
             self.perform_destroy(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -105,7 +105,7 @@ class BoardView(viewsets.ModelViewSet):
     def create(self, request):
         post_data = request.data.dict()
         serializer = self.get_serializer(data=post_data)
-        if request.user.is_administrator == False:
+        if not request.user.is_administrator:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -116,7 +116,7 @@ class BoardView(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if request.user.is_administrator == False:
+        if not request.user.is_administrator:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -130,7 +130,19 @@ class ThreadView(viewsets.ModelViewSet):
         django_filters.rest_framework.DjangoFilterBackend,
     ]
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filter_fields = ("board__id",)
+    filterset_fields = ("board__id",)
+
+    def create(self, request):
+        post_data = request.data.dict()
+        serializer = self.get_serializer(data=post_data)
+        if request.user.is_banned:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
 
 class PostView(viewsets.ModelViewSet):
@@ -141,8 +153,20 @@ class PostView(viewsets.ModelViewSet):
         django_filters.rest_framework.DjangoFilterBackend,
         OrderingFilter,
     ]
-    filter_fields = (
+    filterset_fields = (
         "thread__id",
-        "poster_id",
+        "author__id",
     )
     ordering = ["created_at"]
+
+    def create(self, request):
+        post_data = request.data.dict()
+        serializer = self.get_serializer(data=post_data)
+        if request.user.is_banned:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
