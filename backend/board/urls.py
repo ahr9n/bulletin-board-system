@@ -12,7 +12,7 @@ router.register(r"posts", PostView, "posts")
 
 urlpatterns = [
     path("api/", include(router.urls)),
-    path("register/", RegisterAPI.as_view()),
+    path("registration/", RegisterAPI.as_view()),
     path("login/", LoginAPI.as_view()),
     path("logout/", knox_views.LogoutView.as_view(), name="knox_logout"),
 ]
